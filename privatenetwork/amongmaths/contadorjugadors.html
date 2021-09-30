@@ -1,0 +1,30 @@
+<html>
+    <head>
+        <style>
+            body{
+                text-align: center;
+            }
+        </style>
+        <script>
+        var i = 0
+        function clickLink() {
+            i++;
+            if (i == 1) {
+                document.getElementById("clicks").innerHTML = i; 
+            }
+            else
+            {
+                document.getElementById("clicks").innerHTML = i;
+            }
+        }
+        function Reset() {
+            i = 0;
+            document.getElementById("clicks").innerHTML = i;
+        }
+        </script>
+    </head>
+    <body>
+        <a href="javascript:clickLink();">+1 Punt</a>
+        <p>Jugador 1: <span id="clicks">0</span></p>
+    </body>
+</html>
