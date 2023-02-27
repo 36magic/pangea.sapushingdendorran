@@ -1,43 +1,98 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
   <head>
-    <meta charset="utf-8">
-    <title>Online File Converter</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YouTube to WAV/MP4 Converter</title>
   </head>
   <body>
-    <input type="file" id="input-file">
-    <button id="convert-btn">Convert</button>
+    <div>
+      <label for="url">Enter YouTube Video URL:</label>
+      <input type="text" id="url" placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ" />
+    </div>
+    <div>
+      <label for="format">Select Output Format:</label>
+      <select id="format">
+        <option value="wav">WAV</option>
+        <option value="mp4">MP4</option>
+      </select>
+    </div>
+    <div>
+      <button id="convert-btn">Convert</button>
+    </div>
+    <div id="status"></div>
 
     <script>
-      const apiKey = 'YOUR_API_KEY_HERE';
-      const apiEndpoint = 'https://api.onlineconvert.com/';
+      const convertBtn = document.getElementById("convert-btn");
+      const urlInput = document.getElementById("url");
+      const formatSelect = document.getElementById("format");
+      const statusDiv = document.getElementById("status");
 
-      const inputFile = document.getElementById('input-file');
-      const convertBtn = document.getElementById('convert-btn');
+      const apiEndpoint = "https://api2.online-convert.com/jobs";
 
-      convertBtn.addEventListener('click', () => {
-        const inputFileType = inputFile.files[0].type;
-        const inputFileData = inputFile.files[0];
+      const apiKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiMGJkNjlhN2VlZmM2NzJiZjQ4Zjc3ZDdiMjJjODVmZmEzNjU2MjhhYTY2ZmE1NTAwMzAwNzhjMGFlOTk1MDUxNGJiZjJiZmE1YmZhYjJlZDYiLCJpYXQiOjE2Nzc1MzQ2NDMuNzY1ODQzLCJuYmYiOjE2Nzc1MzQ2NDMuNzY1ODQ0LCJleHAiOjQ4MzMyMDgyNDMuNzU1OTYyLCJzdWIiOiI2MjMzNjMxOSIsInNjb3BlcyI6WyJ0YXNrLnJlYWQiLCJ0YXNrLndyaXRlIiwid2ViaG9vay5yZWFkIiwid2ViaG9vay53cml0ZSIsInByZXNldC5yZWFkIiwicHJlc2V0LndyaXRlIl19.cW6PKfoQ4m1wnSMJlaeoflWkWe_TUOC-Z38avJArm4vdsib40hJBNtp919ucWdYMXJYSheZUcaZ8oI-z1dRjUziCP8kFo5G4JK77CTFWCo4q_entyR5FNTkP3sNlm3PJuF2kxfemmZ6oDzRTCukoz4X8KoQS_8MCj9tTDU1f2K5OBrYDeVCQr9RampsFVwdgTtY_-1HuhN0-kUAICjXtJE2ZY5t86A0vV3Xj_Lg8wPNyjQdvLUcwKcEVjiOuf-k_R_dqkGyK5XBvbuXvVhgptmot7vAMjFSVwIyAG3gQzaClMNHvIgy4a_SrIgso6Cl1nYNez_RZV58H3VyX0jA1hT39GIJkn3EYaZjNdU-ATutE5myVY6wtAbs7Co1o7ZM708OGWKrPwPsYrLL2y3GM3502GIJyTQzNbz6aSUDRDtZoiLLPmQKegvstC-Fmfik88Qv6VbZU2B5piMlyekkttRm4hGNHb9aCkq5NmLNgRSmzzYCfJmScNE1xt6HZVg6wqPw3lo_bVgBaJtuJjq_-y6ebGM4cRk8oagwoCiZOj0jMjTQaWh82F77oWGXa9ElgEmuKxq-CccAFrYc-Rqe2jatnVwqoshYZy0rH-kt1Vwrqfgf-D3Fpk1u1HtjoRnP5QR7QTSymnm5hMczA0KP3axi4s5on4OFh5zm-y2PlpaI
+";
 
-        const request = new XMLHttpRequest();
-        request.open('POST', apiEndpoint + 'v2/convert-to');
-        request.setRequestHeader('X-Api-Key', apiKey);
-        request.setRequestHeader('Content-Type', 'application/json');
-        request.onreadystatechange = () => {
-          if (request.readyState === XMLHttpRequest.DONE) {
-            if (request.status === 200) {
-              const response = JSON.parse(request.responseText);
-              window.location.href = response.output.url;
+      function showError(msg) {
+        statusDiv.innerHTML = `<p style="color: red">${msg}</p>`;
+      }
+
+      function showSuccess(msg) {
+        statusDiv.innerHTML = `<p style="color: green">${msg}</p>`;
+      }
+
+      function submitJob(data) {
+        fetch(apiEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Oc-Api-Key": apiKey,
+          },
+          body: JSON.stringify(data),
+        })
+          .then((response) => response.json())
+          .then((response) => {
+            if (response.errors) {
+              showError(`Error submitting job: ${response.errors[0].detail}`);
             } else {
-              console.error('Error: ' + request.status);
+              const jobId = response.data.id;
+              showSuccess(`Job submitted. Job ID: ${jobId}`);
+              checkJobStatus(jobId);
             }
-          }
-        };
-        const formData = new FormData();
-        formData.append('input', 'base64:' + btoa(new FileReaderSync().readAsBinaryString(inputFileData)));
-        formData.append('output_format', 'mp3');
-        request.send(JSON.stringify(formData));
-      });
-    </script>
-  </body>
-</html>
+          })
+          .catch((error) => {
+            showError(`Error submitting job: ${error.message}`);
+          });
+      }
+
+      function checkJobStatus(jobId) {
+        fetch(`${apiEndpoint}/${jobId}/status`, {
+          headers: {
+            "X-Oc-Api-Key": apiKey,
+          },
+        })
+          .then((response) => response.json())
+          .then((response) => {
+            const status = response.data.attributes.status;
+            if (status === "completed") {
+              const outputUrl = response.data.attributes.output[0].uri;
+              showSuccess(`Conversion complete. Download link: <a href="${outputUrl}">${outputUrl}</a>`);
+            } else if (status === "processing") {
+              showSuccess("Job in progress. Please wait...");
+              setTimeout(() => {
+                checkJobStatus(jobId);
+              }, 5000);
+            } else {
+              showError(`Job failed. Status: ${status}`);
+            }
+          })
+          .catch((error) => {
+            showError(`Error checking job status: ${error.message}`);
+          });
+      }
+
+      convertBtn.addEventListener("click", () => {
+        const url = urlInput.value.trim();
+        if (!url) {
+          showError("Please enter a YouTube video URL.");
+          return
