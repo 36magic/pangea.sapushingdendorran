@@ -3,22 +3,42 @@
   <head>
     <meta charset="utf-8">
     <title>YouTube To Audio</title>
-    <script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js">
-    </script>
+    <script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   </head>
   <body>
-    <input type="text" id = "youtubelink">
-    <button id = "download">Download</button>
+    <input type="text" id="youtubelink">
+    <button id="download">Download</button>
 
-    <audio id="audio" autoplay controls style = "margin-top: 30px; display: none;"></audio>
+    <audio id="audio" autoplay controls style="margin-top: 30px; display: none;"></audio>
 
     <script>
-      $.getScript("https://ytconverter.github.io/converter.js", function(){
-        $("#download").click(function(){
-          $("#audio").css("display", "block");
-          var youtubelink = $('#youtubelink').val();
-          var audio_tag = $('#audio')[0];
-          converter(youtubelink, audio_tag);
+      $("#download").click(function(){
+        $("#audio").css("display", "block");
+        var youtubelink = $('#youtubelink').val();
+        var audio_tag = $('#audio')[0];
+        var api_key = 'your_api_key_here';
+        var output_format = 'mp3';
+        var api_url = 'https://api.online-convert.com';
+        var conversion_url = api_url + '/convert/' + output_format + '/url';
+        var request_data = {
+          'apikey': api_key,
+          'input': 'download',
+          'filetype': 'audio',
+          'outputformat': output_format,
+          'inputurl': youtubelink
+        };
+        $.ajax({
+          type: 'POST',
+          url: conversion_url,
+          data: JSON.stringify(request_data),
+          contentType: 'application/json',
+          success: function(response) {
+            var download_url = response.output[0].uri;
+            audio_tag.src = download_url;
+          },
+          error: function(xhr, status, error) {
+            console.log('Error converting file: ' + error);
+          }
         });
       });
     </script>
