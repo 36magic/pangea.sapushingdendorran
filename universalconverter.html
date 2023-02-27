@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Online File Converter</title>
+  </head>
+  <body>
+    <input type="file" id="input-file">
+    <button id="convert-btn">Convert</button>
+
+    <script>
+      const apiKey = 'YOUR_API_KEY_HERE';
+      const apiEndpoint = 'https://api.onlineconvert.com/';
+
+      const inputFile = document.getElementById('input-file');
+      const convertBtn = document.getElementById('convert-btn');
+
+      convertBtn.addEventListener('click', () => {
+        const inputFileType = inputFile.files[0].type;
+        const inputFileData = inputFile.files[0];
+
+        const request = new XMLHttpRequest();
+        request.open('POST', apiEndpoint + 'v2/convert-to');
+        request.setRequestHeader('X-Api-Key', apiKey);
+        request.setRequestHeader('Content-Type', 'application/json');
+        request.onreadystatechange = () => {
+          if (request.readyState === XMLHttpRequest.DONE) {
+            if (request.status === 200) {
+              const response = JSON.parse(request.responseText);
+              window.location.href = response.output.url;
+            } else {
+              console.error('Error: ' + request.status);
+            }
+          }
+        };
+        const formData = new FormData();
+        formData.append('input', 'base64:' + btoa(new FileReaderSync().readAsBinaryString(inputFileData)));
+        formData.append('output_format', 'mp3');
+        request.send(JSON.stringify(formData));
+      });
+    </script>
+  </body>
+</html>
